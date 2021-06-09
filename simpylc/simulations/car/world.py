@@ -26,27 +26,18 @@
 # Removing this header ends your licence.
 #
 
+
 import os
 import sys as ss
 
 ss.path.append (os.path.abspath ('../../..')) # If you want to store your simulations somewhere else, put SimPyLC in your PYTHONPATH environment variable
 ss.path.append(os.path.abspath("~/Workdir/self-driving/SimPyLC-lidar_car/simpylc/simulations/car/"))
-import simpylc as sp
 
-import control as ct
-import keyboard_pilot as kp
-import lidar_pilot as lp
-import lidar_pilot_sp as ls
-import physics as ps
-import visualisation as vs
-import timing as tm
+import movement as mv
+popsize = 200
+genLength = 20
+crossoverRate = 0.9
 
-sp.World (
-    # ct.Control,
-    # kp.KeyboardPilot,
-    lp.LidarPilot,
-    # ls.LidarPilotSp,
-    ps.Physics,
-    vs.Visualisation,
-    # tm.Timing
-)
+initialPop = [mv.NeuralNet() for x in range(0,popsize)]
+ga = mv.GeneticAlgo(genLength, crossoverRate, initialPop) 
+ga.run(50)

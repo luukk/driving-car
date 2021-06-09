@@ -26,15 +26,12 @@
 
 import time as tm
 import traceback as tb
-
 import simpylc as sp
-
 import numpy as np
 # import keras as ks
 
 
-from torch import nn
-from driving.main import NeuralNet
+# from driving.main import NeuralNet
 
 # neuralNet = NeuralNet()
 
@@ -48,19 +45,22 @@ from driving.main import NeuralNet
 
 
 class LidarPilot:
+    """
+    maxTime is the max amout of seconds the loop can run for
+    """
     def __init__ (self):
         # print ('Use up arrow to start, down arrow to stop')
         
         self.driveEnabled = False
-
-        self.neuralNet = NeuralNet()
+        # self.neuralNet = NeuralNet()
 
         while True:
-            self.input ()
-            self.sweep ()
-            self.output ()
-            tm.sleep (0.02)
-        
+            self.input()
+            self.sweep()
+            # self.setNextMove(net.forward(self.targetObstacleDistance, self.targetObstacleAngle))
+            self.output()
+            tm.sleep (0.02)     
+
     def input (self):   # Input from simulator
         # key = sp.getKey ()
         
@@ -68,11 +68,11 @@ class LidarPilot:
         #     self.driveEnabled = True
         # elif key == 'KEY_DOWN':
         #     self.driveEnabled = False
-        
-        self.lidarDistances = sp.world.visualisation.lidar.distances
-        self.lidarHalfApertureAngle = sp.world.visualisation.lidar.halfApertureAngle
+        pass
         
     def sweep (self):   # Control algorithm to be tested
+        self.lidarDistances = sp.world.visualisation.lidar.distances
+        self.lidarHalfApertureAngle = sp.world.visualisation.lidar.halfApertureAngle
         self.nearestObstacleDistance = sp.finity
         self.nearestObstacleAngle = 0
         
@@ -95,15 +95,14 @@ class LidarPilot:
            
         self.targetObstacleDistance = (self.nearestObstacleDistance + self.nextObstacleDistance) / 2
         self.targetObstacleAngle = (self.nearestObstacleAngle + self.nextObstacleAngle) / 2
-
-        nextmove = self.neuralNet.forward(self.targetObstacleDistance, self.targetObstacleAngle)
-
-        self.targetVelocity = nextmove[0]
-        self.steeringAngle = nextmove[1] * 90
-        
+        self.setNextMove(0,0)
         # self.steeringAngle = self.targetObstacleAngle
         # self.targetVelocity = (sp.abs (90 - self.steeringAngle) / 80) if self.driveEnabled else 0
     
+    def setNextMove(self, velocity: int, angle: int) -> None:
+        self.targetVelocity = velocity
+        self.steeringAngle = angle * 90
+
     def output (self):  # Output to simulator
         sp.world.physics.steeringAngle.set (self.steeringAngle)
         sp.world.physics.targetVelocity.set (self.targetVelocity)
