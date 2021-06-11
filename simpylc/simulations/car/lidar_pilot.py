@@ -28,6 +28,8 @@ import time as tm
 import traceback as tb
 import simpylc as sp
 import numpy as np
+import socket
+import sys
 # import keras as ks
 
 
@@ -52,6 +54,10 @@ class LidarPilot:
         # print ('Use up arrow to start, down arrow to stop')
         
         self.driveEnabled = False
+        socketClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        socketClient.connect((socket.gethostname(), 8089))
+        socketClient.send(b'CONN_START')
+        data = socketClient.recv(1024)
         # self.neuralNet = NeuralNet()
 
         while True:

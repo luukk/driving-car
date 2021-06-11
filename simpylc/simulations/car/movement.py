@@ -4,6 +4,8 @@ from torch import nn, LongTensor, FloatTensor, ones
 from numpy.random import randint
 from numpy.random import rand
 import random as rnd
+import socket
+import sys
 import lidar_pilot as lidarPilot
 import subprocess as sub
 import time as tm
@@ -67,7 +69,7 @@ class Citizen:
     def __init__(self, net: NeuralNet):
         self.net = net
     
-    def run(self):
+    def run(self, socket):
         self.net.initializeNetwork()
         # w = self.net.getWeights()
         # ssl = []
@@ -75,7 +77,12 @@ class Citizen:
         #     ssl.append("-".join(x))
         # nk = " ".join(ssl)
         proc = sub.Popen(['python3 runner.py'], stdout=sub.PIPE, shell=True, preexec_fn=os.setsid)
-        tm.sleep(0.1)
+        childRunning = True
+        while childRunning:
+            #wait to accept a connection - blocking call
+            conn, addr = socket.accept()
+            print('Connected with ' + addr[0] + ':' + str(addr[1]))
+
         os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
 
 
@@ -85,14 +92,26 @@ class GeneticAlgo:
     population = []
     gensize = 0
     crossover_rate = 0
+    hostPort = 8089
+    socketServer = None
     
     def __init__(self, gensize: int, crossover: int, population: List[NeuralNet]):
         self.popsize = len(population)
         self.gensize = gensize
         self.crossover_rate = crossover
         self.population = [Citizen(x) for x in population]
-    
+        self.socketServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
+        
+        try:
+            self.socketServer.bind((socket.gethostname(), self.hostPort))
+        except socket.error as message:
+            print(message)
+            sys.exit()
+
+
     def run(self, max_gens: int) -> None:
+        self.socketServer.listen(10)
+        print('listening socket')
         self.runGeneration(self.population)
         # current_best = 0, self.objective(self.population[0])
         # best, bestEval = 10000, 0
@@ -107,7 +126,7 @@ class GeneticAlgo:
         work = []
         cs = 10
         for x in gen:
-            work.append(threading.Thread(target=x.run()))
+            work.append(threading.Thread(target=x.run(self.socketServer)))
         currWork = work[:cs]
         
         for t in range(0,len(gen)/cs):
@@ -118,6 +137,7 @@ class GeneticAlgo:
             for s in currWork:
                 s.join()
             currWork = work[:cs*t]
+
     def objective(self, citizen: Citizen) -> int:
         score = citizen.run()
         return score
