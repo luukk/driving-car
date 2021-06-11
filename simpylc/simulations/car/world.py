@@ -34,10 +34,3 @@ ss.path.append (os.path.abspath ('../../..')) # If you want to store your simula
 ss.path.append(os.path.abspath("~/Workdir/self-driving/SimPyLC-lidar_car/simpylc/simulations/car/"))
 
 import movement as mv
-popsize = 200
-genLength = 20
-crossoverRate = 0.9
-
-initialPop = [mv.NeuralNet() for x in range(0,popsize)]
-ga = mv.GeneticAlgo(genLength, crossoverRate, initialPop) 
-ga.run(50)
