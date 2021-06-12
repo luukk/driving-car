@@ -76,7 +76,10 @@ class NeuralNet:
             weights.append(param.data)
 
         return weights
-            # print(param.data)
+
+    def setWeights(self, s):
+        for i, x in enumerate(s):
+            self.changeWeight(i,x)
 
     def changeWeight(self, given_index, tensor):
         for index, (name, param) in enumerate(self.NeuralNet.named_parameters()):
@@ -91,7 +94,7 @@ def dumpDat(dat):
     print(dat)
 
 class LidarPilot:
-    popSize = 50
+    popSize = 3
     population = []
     genSize = 20
     maxGens = 10
@@ -108,6 +111,7 @@ class LidarPilot:
     """
     def __init__ (self):
         myprint(" yee")
+        print("HELLO")
         self.allPolygons = Polygon(np.concatenate((self.polygonOut, self.polygonIn)))
         self.population = [NeuralNet() for x in range(self.popSize)]
         self.currentBest = self.testNet(self.population[0])
@@ -120,24 +124,27 @@ class LidarPilot:
             selected = [self.select(self.population, scores) for _ in range(self.genSize)]
             children = list()
 
-            for i in range(0, self.genSize, 2):
-                p1, p2 = selected[i], selected[i+1]
-                for c in self.crossover(p1,p2):
-                    m = self.mut(c)
-                    children.append(m)
-                self.population = children
+            p1, p2 = selected[0], selected[1]
+            for c in self.crossover(p1,p2):
+                m = self.mut(c)
+                children.append(m)
+            self.population = children
             
     def mut(self, c):
         print(c)
         return c
 
-    def crossover(self, p1, p2):
+    def crossover(self, k1, k2):
+        p1, p2 = k1.getWeights(), k2.getWeights()
+        print(p1,p2)
         c1, c2 = p1.copy(), p2.copy()
-        if rand() < r_cross:
+        if rand() < self.crossover_rate:
             pt = randint(1, len(p1)-2)
             c1 = p1[:pt] + p2[pt:]
             c2 = p2[:pt] + p1[pt:]
-        return [c1, c2]
+        k1.setWeights(c1)
+        k2.setWeights(c2)
+        return [k1, k2]
 
     def select(self, population, scores, k=3):
         selection = randint(len(population))
@@ -156,13 +163,15 @@ class LidarPilot:
             v,a = net.forward(self.targetObstacleDistance, self.targetObstacleAngle)
             self.setNextMove(v,a)
             self.output()
-
-            if not self.x() and not self.checkCollision():
-                return self.scoreAndReset()
+            #and not self.checkCollision()
+            if not self.x():
+                score = self.scoreAndReset()
+                print(score)
+                return score
             tm.sleep (0.02)
             
         f = self.scoreAndReset() 
-        myprint(f)
+        print(f)
         return f
 
     def x(self):

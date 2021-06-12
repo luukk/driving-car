@@ -427,22 +427,22 @@ class AgentThread (Thread):
         self.start ()
     
     def run (self):
-        cs.wrapper (self.main)
+        self.main()
         
-    def main (self, window):
-        def print (*args):
-            window.addstr (' '.join (str (arg) for arg in args) + '\n')
+    def main (self, window = 0):
+        # def print (*args):
+        #     window.addstr (' '.join (str (arg) for arg in args) + '\n')
             
-        def getKey ():
-            try:
-                return window.getkey ()
-            except:
-                return ''
+        # def getKey ():
+        #     try:
+        #         return window.getkey ()
+        #     except:
+        #         return ''
         
-        window.nodelay (True)
+        # window.nodelay (True)
         agentModule = ss.modules [self.Agent.__module__]
-        agentModule.print = print
-        agentModule.sp.getKey = getKey
+        # agentModule.print = print
+        # agentModule.sp.getKey = getKey
         self.Agent ()
         
 finity = 1e20
