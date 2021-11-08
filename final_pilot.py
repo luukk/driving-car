@@ -29,13 +29,13 @@ class NeuralNet:
         output_size = 2# Build a feed-forward network
         model = nn.Sequential(
             nn.Linear(input_size, hidden_sizes[0], bias=False), #
-            # nn.Tanh(),
-            # nn.Linear(hidden_sizes[0], hidden_sizes[1], bias=False),
-            # nn.Tanh(),
-            # nn.Linear(hidden_sizes[0], hidden_sizes[1], bias=False),
-            # nn.Tanh(),
-            # nn.Linear(hidden_sizes[0], hidden_sizes[1], bias=False),
-            # nn.Tanh(),
+            nn.Tanh(),
+            nn.Linear(hidden_sizes[0], hidden_sizes[1], bias=False),
+            nn.Tanh(),
+            nn.Linear(hidden_sizes[0], hidden_sizes[1], bias=False),
+            nn.Tanh(),
+            nn.Linear(hidden_sizes[0], hidden_sizes[1], bias=False),
+            nn.Tanh(),
             nn.Linear(hidden_sizes[1], output_size, bias=False),
             nn.Tanh())
 
